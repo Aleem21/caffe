@@ -170,7 +170,8 @@ ifneq ($(CPU_ONLY), 1)
 	LIBRARIES := cudart cublas curand
 endif
 
-LIBRARIES += glog gflags protobuf boost_system m hdf5_hl hdf5
+BOOST_IF_MT :=-mt
+LIBRARIES += glog gflags protobuf boost_system$(BOOST_IF_MT) m hdf5_hl hdf5
 
 # handle IO dependencies
 USE_LEVELDB ?= 1
@@ -191,7 +192,7 @@ ifeq ($(USE_OPENCV), 1)
 	endif
 		
 endif
-PYTHON_LIBRARIES := boost_python python2.7
+PYTHON_LIBRARIES := boost_python$(BOOST_IF_MT) python2.7
 WARNINGS := -Wall -Wno-sign-compare
 
 ##############################
@@ -252,7 +253,7 @@ ifeq ($(LINUX), 1)
 	endif
 	# boost::thread is reasonably called boost_thread (compare OS X)
 	# We will also explicitly add stdc++ to the link target.
-	LIBRARIES += boost_thread stdc++
+	LIBRARIES += boost_thread$(BOOST_IF_MT) stdc++
 endif
 
 # OS X:
@@ -272,7 +273,7 @@ ifeq ($(OSX), 1)
 	# gtest needs to use its own tuple to not conflict with clang
 	COMMON_FLAGS += -DGTEST_USE_OWN_TR1_TUPLE=1
 	# boost::thread is called boost_thread-mt to mark multithreading on OS X
-	LIBRARIES += boost_thread-mt
+	LIBRARIES += boost_thread$(BOOST_IF_MT)
 	# we need to explicitly ask for the rpath to be obeyed
 	DYNAMIC_FLAGS := -install_name @rpath/libcaffe.so
 	ORIGIN := @loader_path
