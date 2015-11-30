@@ -24,6 +24,13 @@ else
 	OTHER_BUILD_DIR := $(DEBUG_BUILD_DIR)
 endif
 
+BOOST_MT ?= 0
+ifeq ($(BOOST_MT), 1)
+	BOOST_IF_MT :=-mt
+else
+	BOOST_IF_MT :=
+endif
+
 # All of the directories containing code.
 SRC_DIRS := $(shell find * -type d -exec bash -c "find {} -maxdepth 1 \
 	\( -name '*.cpp' -o -name '*.proto' \) | grep -q ." \; -print)
@@ -170,7 +177,6 @@ ifneq ($(CPU_ONLY), 1)
 	LIBRARIES := cudart cublas curand
 endif
 
-BOOST_IF_MT :=-mt
 LIBRARIES += glog gflags protobuf boost_system$(BOOST_IF_MT) boost_filesystem$(BOOST_IF_MT) m hdf5_hl hdf5
 
 # handle IO dependencies
