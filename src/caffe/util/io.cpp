@@ -14,6 +14,8 @@
 #include <fstream>  // NOLINT(readability/streams)
 #include <string>
 #include <vector>
+#include <execinfo.h>
+#include <signal.h>
 
 #include "caffe/common.hpp"
 #include "caffe/proto/caffe.pb.h"
@@ -69,9 +71,23 @@ void WriteProtoToBinaryFile(const Message& proto, const char* filename) {
   CHECK(proto.SerializeToOstream(&output));
 }
 
+void err_handler(int sig) {
+  void *array[10];
+  size_t size;
+
+  // get void*'s for all entries on the stack
+  size = backtrace(array, 10);
+
+  // print out all the frames to stderr
+  fprintf(stderr, "Error: signal %d:\n", sig);
+  backtrace_symbols_fd(array, size, STDERR_FILENO);
+  exit(1);
+}
+
 #ifdef USE_OPENCV
 cv::Mat ReadImageToCVMat(const string& filename,
     const int height, const int width, const bool is_color) {
+  signal(SIGSEGV, err_handler);
   cv::Mat cv_img;
   int cv_read_flag = (is_color ? CV_LOAD_IMAGE_COLOR :
     CV_LOAD_IMAGE_GRAYSCALE);

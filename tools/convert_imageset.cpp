@@ -35,6 +35,7 @@ DEFINE_string(backend, "lmdb",
         "The backend {lmdb, leveldb} for storing the result");
 DEFINE_int32(resize_width, 0, "Width images are resized to");
 DEFINE_int32(resize_height, 0, "Height images are resized to");
+DEFINE_int32(start_num, 0, "Start number");
 DEFINE_bool(check_size, false,
     "When this option is on, check that all the datum have the same size");
 DEFINE_bool(encoded, false,
@@ -69,6 +70,7 @@ int main(int argc, char** argv) {
   const bool check_size = FLAGS_check_size;
   const bool encoded = FLAGS_encoded;
   const string encode_type = FLAGS_encode_type;
+  const int start_file_num = FLAGS_start_num;
 
   std::ifstream infile(argv[2]);
   std::vector<std::pair<std::string, int> > lines;
@@ -83,6 +85,7 @@ int main(int argc, char** argv) {
     shuffle(lines.begin(), lines.end());
   }
   LOG(INFO) << "A total of " << lines.size() << " images.";
+  LOG(INFO) << "Starting from im no " << start_file_num;
 
   if (encode_type.size() && !encoded)
     LOG(INFO) << "encode_type specified, assuming encoded=true.";
@@ -104,7 +107,7 @@ int main(int argc, char** argv) {
   int data_size = 0;
   bool data_size_initialized = false;
 
-  for (int line_id = 0; line_id < lines.size(); ++line_id) {
+  for (int line_id = start_file_num; line_id < lines.size(); ++line_id) {
     bool status;
     std::string enc = encode_type;
     if (encoded && !enc.size()) {
@@ -131,7 +134,7 @@ int main(int argc, char** argv) {
       }
     }
     // sequential
-    int length = snprintf(key_cstr, kMaxKeyLength, "%08d_%s", line_id,
+    int length = snprintf(key_cstr, kMaxKeyLength, "%08d_%s", line_id - start_file_num,
         lines[line_id].first.c_str());
 
     // Put in db
