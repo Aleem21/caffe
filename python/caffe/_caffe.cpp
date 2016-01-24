@@ -222,6 +222,11 @@ BOOST_PYTHON_MODULE(_caffe) {
 
   bp::def("layer_type_list", &LayerRegistry<Dtype>::LayerTypeList);
 
+  bp::enum_<Phase>("Phase")
+    .value("TRAIN", caffe::TRAIN)
+    .value("TEST", caffe::TEST)
+    .export_values();
+
   bp::class_<Net<Dtype>, shared_ptr<Net<Dtype> >, boost::noncopyable >("Net",
     bp::no_init)
     .def("__init__", bp::make_constructor(&Net_Init))
@@ -281,6 +286,7 @@ BOOST_PYTHON_MODULE(_caffe) {
           bp::return_internal_reference<>()))
     .def("setup", &Layer<Dtype>::LayerSetUp)
     .def("reshape", &Layer<Dtype>::Reshape)
+    .add_property("phase", bp::make_function(&Layer<Dtype>::phase))
     .add_property("type", bp::make_function(&Layer<Dtype>::type));
   bp::register_ptr_to_python<shared_ptr<Layer<Dtype> > >();
 
